@@ -1,6 +1,6 @@
 operations-app:
-  contactpoint: "${OPERATIONS_APP_CONTACTPOINT:http://ph-ee-operations-app:80}"
-  dpgcontactpoint: "${OPERATIONS_APP_DPG_CONTACTPOINT:http://ph-ee-operations-app:80}"
+  contactpoint: "${OPERATIONS_APP_CONTACTPOINT:http://paymenthub-ee-bff:80}"
+  dpgcontactpoint: "${OPERATIONS_APP_DPG_CONTACTPOINT:http://paymenthub-ee-bff:80}"
   username: "mifos"
   password: "password"
   auth:
@@ -20,13 +20,13 @@ operations-app:
 
 paybill:
   mpesa-connector:
-    contactpoint: "${MPESA_CONNECTOR_CONTACTPOINT:http://ph-ee-connector-mpesa:80}"
+    contactpoint: "${MPESA_CONNECTOR_CONTACTPOINT:http://paymenthub-ee-connector-mpesa:80}"
     endpoints:
       validation: "/validation"
       settlement: "/confirmation"
 
 bulk-processor:
-  contactpoint: "${BULK_PROCESSOR_CONTACTPOINT:http://ph-ee-bulk-processor:80}"
+  contactpoint: "${BULK_PROCESSOR_CONTACTPOINT:http://paymenthub-ee-bulk-processor:80}"
   endpoints:
     bulk-transactions: "/batchtransactions"
     simulate: "/simulate"
@@ -34,7 +34,7 @@ bulk-processor:
 
 
 channel-connector:
-  contactpoint: "${CHANNEL_CONNECTOR_CONTACTPOINT:http://ph-ee-connector-channel:80}"
+  contactpoint: "${CHANNEL_CONNECTOR_CONTACTPOINT:http://paymenthub-ee-connector-channel:80}"
   endpoints:
     transfer: "/channel/transfer"
     gsma-p2p: "/channel/gsma/transfer"
@@ -52,18 +52,18 @@ defaults:
   authorization: "Basic bWlmb3M6cGFzc3dvcmQ="
 
 channel:
-  base-url: "${CHANNEL_BASE_URL:http://ph-ee-connector-channel:80}"
+  base-url: "${CHANNEL_BASE_URL:http://paymenthub-ee-connector-channel:80}"
   endpoint: /channel/gsma/transaction
 
 amsmifos:
   mock:
-    base-url: "${AMS_MIFOS_MOCK_BASE_URL:http://ph-ee-connector-ams-mifos:80}"
+    base-url: "${AMS_MIFOS_MOCK_BASE_URL:http://paymenthub-ee-connector-ams-mifosx:80}"
     endpoints:
       repayment-endpoint: /fineract/transactions/loanrepayment
       deposit-endpoint: /fineract/savingsaccount/transfers
 
 ams:
-  base-url: "${AMS_BASE_URL:http://ph-ee-connector-ams-mifos:80}"
+  base-url: "${AMS_BASE_URL:http://paymenthub-ee-connector-ams-mifosx:80}"
   balance-endpoint: /ams/accounts/{IdentifierType}/{IdentifierId}/balance
   status-endpoint: /ams/accounts/{IdentifierType}/{IdentifierId}/status
   name-endpoint: /ams/accounts/{IdentifierType}/{IdentifierId}/accountname
@@ -100,7 +100,7 @@ json-web-signature:
   x509Certificate: "MIIDvDCCAqQCCQDZK/l5vKIt7jANBgkqhkiG9w0BAQsFADCBnzELMAkGA1UEBhMCSU4xEjAQBgNVBAgMCUtBUk5BVEFLQTETMBEGA1UEBwwKRE9NQVNBTkRSQTERMA8GA1UECgwIRllOQVJGSU4xFDASBgNVBAsMC0RFVkVMT1BNRU5UMR0wGwYDVQQDDBRodHRwczovL2Z5bmFyZmluLmlvLzEfMB0GCSqGSIb3DQEJARYQYXZpa0BmeW5hcmZpbi5pbzAeFw0yMzA0MDUwNjExMDNaFw0yMzA1MDUwNjExMDNaMIGfMQswCQYDVQQGEwJJTjESMBAGA1UECAwJS0FSTkFUQUtBMRMwEQYDVQQHDApET01BU0FORFJBMREwDwYDVQQKDAhGWU5BUkZJTjEUMBIGA1UECwwLREVWRUxPUE1FTlQxHTAbBgNVBAMMFGh0dHBzOi8vZnluYXJmaW4uaW8vMR8wHQYJKoZIhvcNAQkBFhBhdmlrQGZ5bmFyZmluLmlvMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtO38XREJbL1r4IAYK6K5ONNXHcmfTKlehRf0YF+vjptt4D/6zBObBOf/zqButSlN3RI/aYXBx/OOU7sjRMnOFYasXtYM5eFSGZDo/v9qsWLwrD9Ur97cE7Pnw3xb+TQNWV6orME5YI0di6X9bXrxUBDswfVmLx/wbvZIK9gJRzD1evm+4HCYo/+1tYZ3YgpNmoW4u6F44zgxeMhFPcjQIaKYm3uM8zF/hTuHhWKVJq40ucL7+mgGp36HiDE8IRfNRo/Vd6x3+FLA91RMe+96uxj7l5WUi8oja1Anb8SE4fnVvGPSArgk8t2xW6dfx86D3c5JFJczzSi5S4ldsOBHMQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBPhTd+DhzbUGqAvsU6T34Iu3k+6Br4N6m90dkvBeMgYL8J7J6Fa7hm7f6xEeDqM+RTPhuFXNlS5swjqUYg/j85jKqVtgYAB6IE7z7BTwBAtF4tJ+jVOV4PfS/lSqvfxwo/qThqU1iXFz9xU38zlqxH5JuWZjeV58uUP/vZC8Ys44RDhU4X1qDbt51Vs8E+DeV1A4aweoEVc/txEdShbxnR2MVpPpca1NOElYW2cTAWjJypgw5bJZX4G0gZmHCZhQtgXSIMC1KSqMM7DK+HA7xTfKNJ+vnD08FOzBAb6nl2cHVb/zySdNWwsPu6w3FmzgFit9Hq2zE2F41167GvRBEL"
 
 identity-account-mapper:
-  contactpoint: "${IDENTITY_ACCOUNT_MAPPER_CONTACTPOINT:http://ph-ee-identity-account-mapper:80}"
+  contactpoint: "${IDENTITY_ACCOUNT_MAPPER_CONTACTPOINT:http://paymenthub-ee-account-mapper:80}"
   endpoints:
     register-beneficiary: /beneficiary
     add-payment-modality: /paymentModality
@@ -127,16 +127,16 @@ kong:
   header:
     apikey: "X-API-KEY"
   service:
-    host: "ph-ee-connector-bulk.paymenthub.80.svc"
-    channel-connector: "https://ph-ee-connector-channel.paymenthub.8443.svc"
+    host: "paymenthub-ee-connector-bulk.paymenthub.svc.cluster.local:80"
+    channel-connector: "https://paymenthub-ee-connector-channel.paymenthub.svc.cluster.local:8443"
   route:
-    host: "${BULK_CONNECTOR_ROUTE_HOST:ph-ee-connector-bulk}"
+    host: "${BULK_CONNECTOR_ROUTE_HOST:paymenthub-ee-connector-bulk}"
     channel:
-      host: "${CHANNEL_ROUTE_HOST:ph-ee-connector-channel}"
+      host: "${CHANNEL_ROUTE_HOST:paymenthub-ee-connector-channel}"
       path: "/channel/transfer"
 
 voucher-management:
-  contactpoint: "${VOUCHER_MANAGEMENT_CONTACTPOINT:http://ph-ee-vouchers:80}"
+  contactpoint: "${VOUCHER_MANAGEMENT_CONTACTPOINT:http://paymenthub-ee-vouchers:80}"
   endpoints:
     create-voucher: /vouchers
     voucher-lifecycle: /vouchers
@@ -147,7 +147,7 @@ voucher-management:
 
 
 mock-payment-schema:
-  contactpoint: "${MOCK_PAYMENT_SCHEMA_CONTACTPOINT:http://ph-ee-connector-mock-payment-schema:80}"
+  contactpoint: "${MOCK_PAYMENT_SCHEMA_CONTACTPOINT:http://paymenthub-ee-connector-mock-payment-schema:80}"
   endpoints:
     mock-batch-authorization: "/batches/"
     actuator: "/actuator/health"
@@ -233,8 +233,8 @@ mojaloop:
       value: "{{CALLBACK_HOST}}"
 
 ml-connector:
-  host:  "${ML_CONNECTOR_HOST:ph-ee-connector-mojaloop-java}"
-  contactpoint: "${ML_CONNECTOR_CONTACTPOINT:http://ph-ee-connector-mojaloop-java:80}"
+  host:  "${ML_CONNECTOR_HOST:paymenthub-ee-connector-mojaloop}"
+  contactpoint: "${ML_CONNECTOR_CONTACTPOINT:http://paymenthub-ee-connector-mojaloop:80}"
   endpoint:
     get-party: "/switch/parties/{{identifierType}}/{{identifier}}"
     get-quote: "/switch/quotes"
@@ -244,7 +244,7 @@ global_wait_time_ms : 10000
 
 
 billPay:
-  contactpoint: "${BILL_PAY_CONTACTPOINT:http://ph-ee-bill-pay:80}"
+  contactpoint: "${BILL_PAY_CONTACTPOINT:http://paymenthub-ee-p2g:80}"
   endpoints:
     inquiry: /bills/{billId}
     payments: /paymentNotifications
