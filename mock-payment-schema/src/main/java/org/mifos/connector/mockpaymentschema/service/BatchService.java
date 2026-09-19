@@ -1,6 +1,5 @@
 package org.mifos.connector.mockpaymentschema.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -9,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import org.mifos.connector.mockpaymentschema.config.ThresholdProperties;
 import org.mifos.connector.mockpaymentschema.schema.AuthorizationRequest;
 import org.mifos.connector.mockpaymentschema.schema.AuthorizationResponse;
 import org.mifos.connector.mockpaymentschema.schema.BatchDTO;
@@ -17,29 +17,31 @@ import org.mifos.connector.mockpaymentschema.schema.Transfer;
 import org.mifos.connector.mockpaymentschema.schema.TransferStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BatchService {
 
-    @Value("${threshold.amount}")
-    private String thresholdAmount;
+    private final Logger logger = LoggerFactory.getLogger(BatchService.class);
 
-    @Autowired
-    private org.mifos.connector.mockpaymentschema.service.SendCallbackService sendCallbackService;
+    private final ThresholdProperties thresholdProperties;
 
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final SendCallbackService sendCallbackService;
 
-    private String payerPartyId = "835322416";
+    private final ObjectMapper objectMapper;
 
-    private String payeePartyId = "27713803912";
+    private final String payerPartyId = "835322416";
 
-    private int successTxnCount = 9;
+    private final String payeePartyId = "27713803912";
 
     private final ConcurrentHashMap<String, BatchDTO> batchSummaryStore = new ConcurrentHashMap<>();
+
+    public BatchService(ThresholdProperties thresholdProperties, SendCallbackService sendCallbackService, ObjectMapper objectMapper) {
+        this.thresholdProperties = thresholdProperties;
+        this.sendCallbackService = sendCallbackService;
+        this.objectMapper = objectMapper;
+    }
 
     public void storeBatchSummary(String batchId, BatchDTO batchDTO) {
         batchSummaryStore.put(batchId, batchDTO);
@@ -47,23 +49,31 @@ public class BatchService {
                 batchDTO.getSuccessful(), batchDTO.getFailed());
     }
 
+    /**
+     * Decides whether the batch is authorized and posts the answer to the callback URL.
+     *
+     * <p>
+     * This runs on the async executor, so the caller already has its 202 by the time anything here happens. Whatever
+     * goes wrong must therefore be logged with enough context to tie it back to a batch - before, an exception here
+     * left no trace the caller could act on and no callback was ever sent.
+     * </p>
+     */
     @Async("asyncExecutor")
     public void getAuthorization(String batchId, String clientCorrelationId, AuthorizationRequest authRequest, String callbackUrl) {
-        AuthorizationResponse response = new AuthorizationResponse();
-
-        if (authRequest.getAmount().compareTo(BigDecimal.valueOf(Long.valueOf(thresholdAmount))) >= 0) {
-            response.setStatus("N");
-            response.setClientCorrelationId(clientCorrelationId);
-            response.setReason("Error getting authorization for the request");
-        } else {
-            response.setClientCorrelationId(clientCorrelationId);
-            response.setStatus("Y");
-        }
         try {
-            logger.info("Sending callback: {}", callbackUrl);
-            sendCallbackService.sendCallback(new ObjectMapper().writeValueAsString(response), callbackUrl);
-        } catch (JsonProcessingException e) {
-            logger.error(e.toString());
+            AuthorizationResponse response = new AuthorizationResponse();
+            response.setClientCorrelationId(clientCorrelationId);
+            if (authRequest.getAmount().compareTo(thresholdProperties.amount()) >= 0) {
+                response.setStatus("N");
+                response.setReason("Error getting authorization for the request");
+            } else {
+                response.setStatus("Y");
+            }
+            logger.info("Sending callback for batch {} to {}", batchId, callbackUrl);
+            sendCallbackService.sendCallback(objectMapper.writeValueAsString(response), callbackUrl);
+        } catch (Exception e) {
+            logger.error("Authorization failed for batch {} with correlation id {}; no callback was sent to {}", batchId,
+                    clientCorrelationId, callbackUrl, e);
         }
     }
 
@@ -107,16 +117,8 @@ public class BatchService {
         List<Transfer> transactionList = new ArrayList<>();
 
         for (int index = 0; index < 10; index++) {
-            Transfer transfer;
-
-            if (successTxnCount > 0) {
-                transfer = getSingleTransaction(index, ThreadLocalRandom.current().nextLong(), UUID.randomUUID().toString(),
-                        TransferStatus.COMPLETED, batchId);
-            } else {
-                transfer = getSingleTransaction(index, ThreadLocalRandom.current().nextLong(), UUID.randomUUID().toString(),
-                        TransferStatus.IN_PROGRESS, batchId);
-            }
-            transactionList.add(transfer);
+            transactionList.add(getSingleTransaction(index, ThreadLocalRandom.current().nextLong(), UUID.randomUUID().toString(),
+                    TransferStatus.COMPLETED, batchId));
         }
         return transactionList;
     }
