@@ -1,8 +1,9 @@
 package org.mifos.connector.mockpaymentschema.config;
 
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.bind.DefaultValue;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * The amount above which the mock scheme treats a transfer as needing authorization.
@@ -14,6 +15,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * BigDecimal keeps the amount an amount, and the parse happens once.
  * </p>
  */
+@Validated
 @ConfigurationProperties(prefix = "threshold")
-public record ThresholdProperties(@DefaultValue("20000") BigDecimal amount) {
+public record ThresholdProperties(@NotNull BigDecimal amount) {
 }

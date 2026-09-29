@@ -11,6 +11,12 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * says: it decides whether the outgoing callback client verifies the server certificate. The default stays false, so
  * the behaviour is the same as before.
  * </p>
+ *
+ * <p>
+ * These two are the only defaults in the module's records, and both match what the code did before: {@code enabled} was
+ * read as {@code @Value("${ams.local.enabled:false}")}, and {@code serverCertCheck} was not read at all, so
+ * certificates were never verified.
+ * </p>
  */
 @ConfigurationProperties(prefix = "ams")
 public record AmsProperties(@DefaultValue Local local) {

@@ -1,7 +1,8 @@
 package org.mifos.connector.mockpaymentschema.config;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.bind.DefaultValue;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * How often the mock scheme should pretend a step failed, as a percentage.
@@ -14,6 +15,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * make half the demo payments fail at random.
  * </p>
  */
+@Validated
 @ConfigurationProperties(prefix = "mockfailure")
-public record MockFailureProperties(@DefaultValue("50") int percentage) {
+public record MockFailureProperties(@NotNull Integer percentage) {
 }
