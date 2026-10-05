@@ -1,7 +1,7 @@
 package org.mifos.connector.mockpaymentschema.config;
 
 import java.util.concurrent.Executor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -9,23 +9,21 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
 @EnableAsync
+@EnableConfigurationProperties(AsyncProperties.class)
 public class AsyncConfiguration {
 
-    @Value("${async.core_pool_size}")
-    public Integer corePoolSize;
+    private final AsyncProperties asyncProperties;
 
-    @Value("${async.max_pool_size}")
-    public Integer maxPoolSize;
-
-    @Value("${async.queue_capacity}")
-    public Integer queueCapacity;
+    public AsyncConfiguration(AsyncProperties asyncProperties) {
+        this.asyncProperties = asyncProperties;
+    }
 
     @Bean(name = "asyncExecutor")
     public Executor asyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(corePoolSize);
-        executor.setMaxPoolSize(maxPoolSize);
-        executor.setQueueCapacity(queueCapacity);
+        executor.setCorePoolSize(asyncProperties.corePoolSize());
+        executor.setMaxPoolSize(asyncProperties.maxPoolSize());
+        executor.setQueueCapacity(asyncProperties.queueCapacity());
         executor.setThreadNamePrefix("AsyncThread-");
         executor.initialize();
         return executor;
