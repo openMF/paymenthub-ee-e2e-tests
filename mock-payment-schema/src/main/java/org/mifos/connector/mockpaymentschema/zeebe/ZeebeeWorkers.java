@@ -142,8 +142,8 @@ public class ZeebeeWorkers {
             // added to pass the transaction request api not found error
             logger.debug("{} {}", variables.get(TRANSACTION_FAILED), variables.get(TRANSACTION_ID));
 
-            zeebeClient.newPublishMessageCommand().messageName("mockTransferResponse")
-                    .correlationKey((String) variables.get(TRANSACTION_ID)).timeToLive(Duration.ofMillis(30000)).send().join();
+            zeebeClient.newPublishMessageCommand().messageName("mockTransferResponse").correlationKey(requiredTransactionId(variables))
+                    .timeToLive(Duration.ofSeconds(30)).send().join();
             client.newCompleteCommand(job.getKey()).variables(variables).send().join();
         }).name("mockInitiateTransfer").maxJobsActive(workerMaxJobs).open();
 
@@ -152,9 +152,8 @@ public class ZeebeeWorkers {
             Map<String, Object> variables = job.getVariablesAsMap();
             variables = setSuccessOrFailure(MockScenario.TRANSACTION, variables);
             // added to pass the transaction request api not found error
-            zeebeClient.newPublishMessageCommand().messageName("mockTransferResponse")
-                    .correlationKey(variables.get(TRANSACTION_ID).toString()).timeToLive(Duration.ofMillis(30000)).variables(variables)
-                    .send().join();
+            zeebeClient.newPublishMessageCommand().messageName("mockTransferResponse").correlationKey(requiredTransactionId(variables))
+                    .timeToLive(Duration.ofSeconds(30)).variables(variables).send().join();
             client.newCompleteCommand(job.getKey()).variables(variables).send().join();
         }).name("getMockStatus").maxJobsActive(workerMaxJobs).open();
 
@@ -189,6 +188,19 @@ public class ZeebeeWorkers {
         boolean failed = successProbability > 0 && successProbability <= mockFailureProperties.percentage();
         variables.put(scenario.failureVariable(), failed);
         return variables;
+    }
+
+    /**
+     * The correlation key of the mockTransferResponse message. Without a transactionId the message can't be correlated,
+     * so the job fails with a message naming the variable instead of a NullPointerException from the Zeebe client.
+     */
+    static String requiredTransactionId(Map<String, Object> variables) {
+        Object transactionId = variables.get(TRANSACTION_ID);
+        if (transactionId == null) {
+            throw new IllegalStateException(
+                    "Zeebe variable '" + TRANSACTION_ID + "' is missing, so the mockTransferResponse message can't be correlated");
+        }
+        return transactionId.toString();
     }
 
     private void logWorkerDetails(ActivatedJob job) {

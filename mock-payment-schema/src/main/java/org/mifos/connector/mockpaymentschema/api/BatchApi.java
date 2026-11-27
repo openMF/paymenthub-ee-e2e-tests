@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class BatchApi {
@@ -60,8 +61,12 @@ public class BatchApi {
     }
 
     @GetMapping(value = "/batches/{batchId}/detail", produces = MediaType.APPLICATION_JSON_VALUE)
-    public BatchDetailResponse batchDetail(@PathVariable String batchId, @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
+    public BatchDetailResponse batchDetail(@PathVariable String batchId, @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
+        // pages are numbered from 1, as connector-bulk's BatchDetailWorker sends them
+        if (pageNo < 1 || pageSize < 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "pageNo and pageSize must be 1 or more");
+        }
         return batchService.getBatchDetails(batchId, pageNo, pageSize);
     }
 }

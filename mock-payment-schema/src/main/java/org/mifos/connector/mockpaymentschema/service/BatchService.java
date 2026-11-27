@@ -88,11 +88,11 @@ public class BatchService {
 
     public BatchDetailResponse getBatchDetails(String batchId, int pageNo, int pageSize) {
         List<Transfer> transactions = getTransactions(batchId);
-        int toIndex = pageNo * pageSize;
-        int fromIndex = toIndex - pageSize;
-        toIndex = Math.min(toIndex, transactions.size());
+        // pageNo counts from 1; a page past the end is empty rather than an IndexOutOfBoundsException
+        int fromIndex = (int) Math.min((long) (pageNo - 1) * pageSize, transactions.size());
+        int toIndex = (int) Math.min((long) fromIndex + pageSize, transactions.size());
         BatchDetailResponse batchDetailResponse = new BatchDetailResponse();
-        batchDetailResponse.setContent(transactions.subList(fromIndex, toIndex));
+        batchDetailResponse.setContent(new ArrayList<>(transactions.subList(fromIndex, toIndex)));
         return batchDetailResponse;
     }
 
